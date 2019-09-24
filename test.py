@@ -16,14 +16,14 @@ import os
 import scipy.io
 from model import ft_net
 
-#from model import 
+#from model import
 
 ######################################################################
 # Options
 # --------
-gpu_ids = '0'
+gpu_ids = '6'
 which_epoch =223
-test_dir = '/home/pt/下载/Market/pytorch'
+test_dir = '/raid/dataset-reid/Market-1501-v15.09.15/pytorch'
 name = 'ft_net_54922'
 batchsize = 32
 
@@ -54,10 +54,10 @@ data_transforms = transforms.Compose([
         transforms.Resize((288,144)),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-############### Ten Crop        
+############### Ten Crop
         #transforms.TenCrop(224),
         #transforms.Lambda(lambda crops: torch.stack(
-         #   [transforms.ToTensor()(crop) 
+         #   [transforms.ToTensor()(crop)
           #      for crop in crops]
            # )),
         #transforms.Lambda(lambda crops: torch.stack(
@@ -102,21 +102,21 @@ def extract_feature(model,dataloaders):
         n, c, h, w = img.size()
         count += n
         print(count)
-        ff = torch.FloatTensor(n,1536).zero_()
+        ff = torch.FloatTensor(n,2253).zero_()
         for i in range(2):
             if(i==1):
                 img = fliplr(img)
             input_img = Variable(img.cuda())
             #img=img.unsqueeze(0)outputs_4
-            
+
             outputs_1,outputs_2,outputs_3,_,_,_,_,_,_= model(input_img)
             outputs = torch.cat((outputs_1,outputs_2,outputs_3),1)
             #outputs = model(input_img)
             f = outputs.data.cpu()
             ff = ff+f
         # norm feature
-       
-        
+
+
         fnorm = torch.norm(ff, p=2, dim=1, keepdim=True)
         ff = ff.div(fnorm.expand_as(ff))
 
@@ -169,7 +169,7 @@ if use_gpu:
 gallery_feature = extract_feature(model,dataloaders['gallery'])
 query_feature = extract_feature(model,dataloaders['query'])
 
-    
+
 # Save to Matlab for check
 result = {'gallery_f':gallery_feature.numpy(),'gallery_label':gallery_label,'gallery_cam':gallery_cam,'query_f':query_feature.numpy(),'query_label':query_label,'query_cam':query_cam}
 scipy.io.savemat('pytorch_result.mat',result)

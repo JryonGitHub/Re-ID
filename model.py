@@ -35,10 +35,10 @@ class ClassBlock(nn.Module):
         add_block1 += [nn.BatchNorm1d(input_dim)]
         if relu:
             add_block1 += [nn.LeakyReLU(0.1)]
-        add_block1 += [nn.Linear(input_dim, num_bottleneck,bias = False)] 
+        add_block1 += [nn.Linear(input_dim, num_bottleneck,bias = False)]
         add_block2 += [nn.BatchNorm1d(num_bottleneck)]
-       
-        
+
+
         #add_block = nn.Sequential(*add_block)
         #add_block.apply(weights_init_kaiming)
         add_block1 = nn.Sequential(*add_block1)
@@ -71,15 +71,16 @@ class ft_net(nn.Module):
         # remove the final downsample
         self.model.layer4[0].downsample[0].stride = (1,1)
         self.model.layer4[0].conv2.stride = (1,1)
+
         self.avgpool_1 = nn.AdaptiveAvgPool2d((1,1))
         #self.avgpool_2 = nn.AdaptiveAvgPool2d((2,2))
-        
         self.avgpool_2 = nn.AdaptiveAvgPool2d((2,2))
         self.avgpool_3 = nn.AdaptiveMaxPool2d((2,2))
         self.avgpool_4 = nn.AdaptiveMaxPool2d((1,1))
         self.avgpool_5 = nn.AdaptiveMaxPool2d((1,1))
+
         self.classifier_1 = ClassBlock(1024, class_num,num_bottleneck=512)
-        
+
         self.classifier_2 = ClassBlock(2048, class_num,num_bottleneck=512)
         self.classifier_3 = ClassBlock(8192, class_num,num_bottleneck=512)
     def forward(self, x):
@@ -91,12 +92,15 @@ class ft_net(nn.Module):
         x = self.model.layer2(x)
         x0 = self.model.layer3(x)
         x = self.model.layer4(x0)
-        x3 = self.model.avgpool(x)
-        x_3 = self.avgpool_5(x)
+
+
+        x3   = self.model.avgpool(x)
+        x_3  = self.avgpool_5(x)
         x_41 = self.avgpool_2(x)
-        x_4 = self.avgpool_3(x)
-        x_0 = self.avgpool_1(x0)
-        x_1 = self.avgpool_4(x0)
+        x_4  = self.avgpool_3(x)
+        x_0  = self.avgpool_1(x0)
+        x_1  = self.avgpool_4(x0)
+
         x0 = x_0 + x_1
         x_31 = x3+x_3
         x4 = x_41+x_4
@@ -107,13 +111,13 @@ class ft_net(nn.Module):
         x3 = torch.squeeze(x3)
         x_3 = torch.squeeze(x_3)
         #x7 = x1.view(x1.size(0),-1)
-        
+
         #
         x9 =  torch.squeeze(x_31)
         x_10= x_4.view(x_4.size(0),-1)
         x_11= x_41.view(x_41.size(0),-1)
         x10= x4.view(x4.size(0),-1)
-       
+
         #
         x14,x15,x16 = self.classifier_1(x6)
         x19,x17,x18 = self.classifier_2(x9)

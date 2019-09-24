@@ -2,7 +2,8 @@ import os
 from shutil import copyfile
 
 # You only need to change this line to your dataset download path
-download_path = '/home/pt/下载/DukeMTMC-reID'
+#download_path = '/raid/dataset-reid/Market-1501-v15.09.15/'
+download_path = '/raid/dataset-reid/DukeMTMC-reID/'
 
 if not os.path.isdir(download_path):
     print('please change the download_path')
@@ -23,7 +24,7 @@ for root, dirs, files in os.walk(query_path, topdown=True):
             continue
         ID  = name.split('_')
         src_path = query_path + '/' + name
-        dst_path = query_save_path + '/' + ID[0] 
+        dst_path = query_save_path + '/' + ID[0]
         if not os.path.isdir(dst_path):
             os.mkdir(dst_path)
         copyfile(src_path, dst_path + '/' + name)
